@@ -48,7 +48,7 @@ const CourseInfo = () => {
             </h1>
           </div>
           <p className="capitalize pt-2 dark:text-white">
-            full life time acces
+            full life time access
           </p>
         </div>
       </div>
