@@ -10,11 +10,11 @@ const Hero = () => {
   const { isLoading } = useContext(CourseContext);
   const { alert } = useContext(AuthenticationContext);
   const { Dark } = useContext(ThemeContext);
-  const [videoSrc, setVideoSrc] = useState("/videos/light-bg.mp4");
+  const [videoSrc, setVideoSrc] = useState("/videos/light-bg-3.mp4");
 
   useEffect(() => {
     // Update video source based on theme
-    setVideoSrc(Dark === "dark" ? "/videos/dark-bg.mp4" : "/videos/ligt-bg.mp4");
+    setVideoSrc(Dark === "dark" ? "/videos/dark-bg-3.mp4" : "/videos/light-bg-3.mp4");
   }, [Dark]); // Re-run effect when theme changes
 
   if (!videoSrc) {
@@ -29,7 +29,7 @@ const Hero = () => {
         autoPlay
         loop
         muted
-        className="absolute top-0 left-0 w-full h-full object-cover z-[-1] blur-sm"
+        className="absolute top-0 left-0 w-full h-full object-cover z-[-1] "
       >
         <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
