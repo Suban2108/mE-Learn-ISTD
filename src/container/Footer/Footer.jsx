@@ -23,8 +23,7 @@ const Footer = () => {
             </span>
           </Link>
           <p className="py-3 text-slate-700 dark:text-slate-300 w-full">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam
-            architecto accusamus quam itaque necessitatibus! Neque!
+          At mE-Learn, we empower learners to thrive in computer science. Our platform offers everything students, professionals, and enthusiasts need to build and advance their technical skills.
           </p>
         </div>
 
@@ -75,7 +74,7 @@ const Footer = () => {
       </div>
       <div className="w-full py-5 border-t border-slate-400 dark:border-slate-500 text-center">
         <p className="text-xl text-slate-900 dark:text-white">
-          &copy;2023 YahYa.
+          &copy;2025 mE-Learn. All Rights Reserved.
         </p>
       </div>
     </div>

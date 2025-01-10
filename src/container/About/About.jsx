@@ -5,9 +5,8 @@ import InfoSkeleton from "../../Skeleton/InfoSkeleton";
 import SectionSkeleton from "../../Skeleton/SectionSkeleton";
 import useFetch from "../../useFetch";
 
-const url =
-  "https://raw.githubusercontent.com/iAmYaxYa/api/main/config/info.json";
-const About = () => {
+const url ="https://raw.githubusercontent.com/iAmYaxYa/api/main/config/info.json";
+const About = () => { 
   const { isLoading, Data } = useFetch(url);
   return (
     <div className="dark:bg-slate-900 pb-20">
@@ -21,12 +20,13 @@ const About = () => {
         />
       ) : (
         <Section
-          image={Images.About}
+        image={Images.About}
           fTitle={"Who"}
           sTitle={"Whe Are?"}
           p="pt-24"
           w="450px"
         />
+        
       )}
       <div className="mt-10 px-4 sm:px-10 gap-5 flex flex-wrap justify-between">
         {isLoading ? (
@@ -40,6 +40,8 @@ const About = () => {
         )}
       </div>
     </div>
+    
+    
   );
 };
 
