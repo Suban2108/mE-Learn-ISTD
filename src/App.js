@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Header, ProtectedRoute, ScrollToTop, WatchCourse } from "./component";
+import UserDashboard from "./component/UserDashboard/UserDashboard";
 import {
   Courses,
   Footer,
@@ -67,10 +68,18 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route 
+          path="/dashboard"
+          element={
+              <UserDashboard />
+            
+          }
+        />
             <Route path="/log-in" element={<LogIn />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          
           <Footer />
         </CourseContextProvider>
       </AuthenticationContextProvider>
