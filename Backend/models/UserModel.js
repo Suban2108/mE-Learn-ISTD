@@ -28,6 +28,9 @@ const UserSchema = new mongoose.Schema({
     hoursWatched: {
         type: Number,  // Total hours watched
     },
+    college_name:{
+        type:String
+    },
     savedRoadmaps: [String],
     recentActivity: [{
         activityName: String,
