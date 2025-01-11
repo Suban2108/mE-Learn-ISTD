@@ -1,7 +1,8 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { AuthenticationContext } from "../../Context/AuthenticationContextProvider/AuthenticationContextProvider";
-import googleLogo from "../../Assets/images/google-logo.png"; // Replace with the correct path to your Google logo
+import googleLogo from "../../Assets/images/google-logo.png";
 
 const Form = ({ type, thirdinput }) => {
   const [username, setUsername] = useState("");
@@ -10,28 +11,58 @@ const Form = ({ type, thirdinput }) => {
   const { setUser } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (type === "log in") {
       if (!email || !password) {
         alert("Email and Password are required!");
         return;
       }
-      // Log in logic can be added here
-      console.log("Logged in with:", { email, password });
+
+      try {
+        const response = await axios.post("http://localhost:6002/user/login", {
+          email,
+          password,
+        });
+
+        const { token } = response.data;
+        if (token) {
+          sessionStorage.setItem("authToken", token);
+          alert("Login successful!");
+          navigate("/");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Invalid credentials or server error!");
+      }
     } else if (type === "sign up") {
       if (!email || !password || !username) {
         alert("Username, Email, and Password are required!");
         return;
       }
-      setUser({ username, email, password });
-      navigate("/");
-      console.log("Signed up with:", { username, email, password });
+
+      try {
+        const response = await axios.post("http://localhost:6002/user/register", {
+          name: username,
+          email,
+          password,
+          bio: "", // Add any default or empty value for bio if not used
+          college_name: "", // Add any default or empty value for college_name if not used
+        });
+
+        if (response.data.msg === "User registered successfully") {
+          alert("Sign Up successful!");
+          navigate("/log-in"); // Redirect to login after successful signup
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error during signup. Please try again!");
+      }
     }
   };
 
   const handleGoogleSignIn = () => {
-    // Add Google sign-in logic here
     console.log(`Google ${type} clicked`);
   };
 
@@ -43,7 +74,6 @@ const Form = ({ type, thirdinput }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            pattern="^[A-Za-z0-9]{3,15}$"
             type="text"
             placeholder="User Name *"
             className="text-lg p-3 dark:text-white dark:placeholder-slate-300 w-full sm:w-[80%] border border-slate-400 bg-transparent outline-0 rounded transition-shadow focus:shadow-lg"
@@ -65,7 +95,6 @@ const Form = ({ type, thirdinput }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          pattern="^[A-Za-z0-9]{6,100}$"
           type="password"
           placeholder="Password *"
           className="text-lg p-3 dark:text-white dark:placeholder-slate-300 w-full sm:w-[80%] border border-slate-400 bg-transparent outline-0 rounded transition-shadow focus:shadow-lg"

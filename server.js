@@ -3,7 +3,7 @@ const cors = require('cors');
 const { Resend } = require('resend');
 
 const app = express();
-const port = 5000; // or any port you prefer
+const port = 5001; // or any port you prefer
 
 // Initialize Resend
 const resend = new Resend('re_9vj6MD6t_HPHe3NFZoM8Li9Q4NwVbnHjw');

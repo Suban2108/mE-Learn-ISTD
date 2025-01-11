@@ -20,7 +20,7 @@ import {
 } from "./container";
 import { ThemeContext } from "./Context/ThemeContextProvider/ThemeContextProvider";
 import { CourseContextProvider } from "./Context/CourseContextProvider/CourseContextProvider";
-import AuthenticationContextProvider from "./Context/AuthenticationContextProvider/AuthenticationContextProvider";
+import AuthenticationContextProvider from "./Context/AuthenticationContextProvider/AuthenticationContextProvider.jsx";
 import "./index.css";
 
 function App() {

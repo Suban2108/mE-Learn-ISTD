@@ -72,7 +72,7 @@ const handleSubmit = async (e) => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch('http://localhost:5000/api/send-email', { // Updated URL
+    const response = await fetch('http://localhost:5001/api/send-email', { // Updated URL
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

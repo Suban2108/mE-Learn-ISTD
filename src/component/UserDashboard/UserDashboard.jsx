@@ -1,16 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEdit, FaSave, FaUpload, FaCalendarCheck, FaBookmark, FaPlayCircle } from "react-icons/fa";
 import { BsFire } from 'react-icons/bs';
 import ContributionCalendar from './ContributionCalendar';
+import axios from 'axios';
 
 const UserDashboard = ({ user }) => {
   const [editMode, setEditMode] = useState(false);
   const [profile, setProfile] = useState({
     name: user?.username || "John Doe",
-    college: "Thadomal Shahani Engineering College",
+    college_name: "Thadomal Shahani Engineering College",
     bio: "Aspiring developer with a passion for learning and building impactful projects.",
-    profilePicture: null, // Stores the uploaded image URL
+    image_path: null, // Stores the uploaded image URL
+    _id: user?._id,
+    streak: 0,
+    completedCourses: 0,
+    hoursWatched: 0
   });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = sessionStorage.getItem("authToken");
+        if (!token) throw new Error("No token found");
+
+        const response = await axios.get("http://localhost:6002/user/login-single", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfile(response.data);  // Set the fetched profile data
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleEditToggle = () => setEditMode(!editMode);
 
@@ -19,15 +45,71 @@ const UserDashboard = ({ user }) => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleProfilePictureChange = (e) => {
+  const handleProfilePictureChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setProfile((prev) => ({ ...prev, profilePicture: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const response = await axios.post(`http://localhost:6002/user/upload-image/${profile._id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        const { image_path } = response.data;
+        setProfile((prev) => ({ ...prev, image_path }));
+      } catch (error) {
+        console.error("Error uploading the profile picture:", error);
+      }
     }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.put(`http://localhost:6002/user/profile-update/${profile._id}`, profile);
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+      setEditMode(false); // Switch back to view mode
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  // Update stats
+  const updateStats = async () => {
+    try {
+      const response = await axios.put('http://localhost:6002/user/update-stats', {
+        streak: profile.streak,
+        completedCourses: profile.completedCourses,
+        hoursWatched: profile.hoursWatched,
+      }, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
+        },
+      });
+
+      console.log("Stats updated:", response.data.message);
+    } catch (error) {
+      console.error("Error updating stats:", error);
+    }
+  };
+
+  // Example to simulate an update of stats
+  const handleCourseCompletion = () => {
+    setProfile((prev) => ({
+      ...prev,
+      completedCourses: prev.completedCourses + 1,
+    }));
+    updateStats();
+  };
+
+  const handleWatchHours = (hours) => {
+    setProfile((prev) => ({
+      ...prev,
+      hoursWatched: prev.hoursWatched + hours,
+    }));
+    updateStats();
   };
 
   return (
@@ -38,9 +120,9 @@ const UserDashboard = ({ user }) => {
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 bg-main dark:bg-sky-500 rounded-full flex items-center justify-center text-4xl text-white font-bold overflow-hidden">
-                {profile.profilePicture ? (
+                {profile.image_path ? (
                   <img
-                    src={profile.profilePicture}
+                    src={`http://localhost:6002/user/image/${profile._id}`}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
@@ -77,8 +159,8 @@ const UserDashboard = ({ user }) => {
                   />
                   <input
                     type="text"
-                    name="college"
-                    value={profile.college}
+                    name="college_name"
+                    value={profile.college_name}
                     onChange={handleInputChange}
                     className="block w-full mt-2 text-gray-600 dark:text-gray-300 bg-transparent border-b border-gray-300 focus:outline-none"
                     placeholder="College"
@@ -98,7 +180,7 @@ const UserDashboard = ({ user }) => {
                     {profile.name}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300">
-                    {profile.college}
+                    {profile.college_name}
                   </p>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">
                     {profile.bio}
@@ -107,7 +189,7 @@ const UserDashboard = ({ user }) => {
               )}
             </div>
             <button
-              onClick={handleEditToggle}
+              onClick={editMode ? handleSaveProfile : handleEditToggle}
               className="flex items-center gap-2 px-4 py-2 bg-main text-white dark:bg-sky-500 rounded-lg shadow hover:bg-main/80 dark:hover:bg-sky-400 transition"
             >
               {editMode ? <FaSave /> : <FaEdit />}
@@ -128,7 +210,7 @@ const UserDashboard = ({ user }) => {
                   Current Streak
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  7 days
+                  {profile.streak} days
                 </p>
               </div>
             </div>
@@ -145,7 +227,7 @@ const UserDashboard = ({ user }) => {
                   Completed Courses
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  3
+                  {profile.completedCourses}
                 </p>
               </div>
             </div>
@@ -162,42 +244,48 @@ const UserDashboard = ({ user }) => {
                   Hours Watched
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  12.5
+                  {profile.hoursWatched} hours
                 </p>
               </div>
             </div>
           </div>
         </div>
-        <div className="mb-6">
+
+        {/* Calendar (if needed) */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
           <ContributionCalendar />
         </div>
 
-        {/* Recent Activity and Saved Roadmaps */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-5">
           {/* Recent Activity */}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 mb-3">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Recent Activity
             </h2>
             <div className="space-y-4">
-              {[1, 2, 3].map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                >
-                  <div className="h-10 w-10 bg-gray-200 dark:bg-slate-600 rounded flex items-center justify-center">
-                    <FaPlayCircle className="h-5 w-5 text-main dark:text-sky-500" />
+              {Array.isArray(profile.recentActivity) && profile.recentActivity.length > 0 ? (
+                profile.recentActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <div className="h-10 w-10 bg-gray-200 dark:bg-slate-600 rounded flex items-center justify-center">
+                      <FaPlayCircle className="h-5 w-5 text-main dark:text-sky-500" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {activity.activityName} {/* Dynamically display activity name */}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(activity.time).toLocaleString()} {/* Display formatted time */}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Introduction to React Hooks
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Watched 2 hours ago
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
+              )}
+
             </div>
           </div>
 
@@ -207,24 +295,30 @@ const UserDashboard = ({ user }) => {
               Saved Roadmaps
             </h2>
             <div className="space-y-4">
-              {[1, 2, 3].map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                >
-                  <div className="h-10 w-10 bg-gray-200 dark:bg-slate-600 rounded flex items-center justify-center">
-                    <FaBookmark className="h-5 w-5 text-main dark:text-sky-500" />
+              {Array.isArray(profile.savedRoadmaps) && profile.savedRoadmaps.length > 0 ? (
+                profile.savedRoadmaps.map((roadmap, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <div className="h-10 w-10 bg-gray-200 dark:bg-slate-600 rounded flex items-center justify-center">
+                      <FaBookmark className="h-5 w-5 text-main dark:text-sky-500" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {roadmap} {/* Dynamically display roadmap name */}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {/* You can add more details like the number of courses if you have this information */}
+                        Courses data is unavailable
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Full Stack Development
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      15 courses • 40 hours
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400">No saved roadmaps</p>
+              )}
+
             </div>
           </div>
         </div>

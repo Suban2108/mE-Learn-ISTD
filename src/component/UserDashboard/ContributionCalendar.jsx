@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, subDays, eachDayOfInterval, startOfWeek, addDays, startOfYear } from 'date-fns';
+import { format, eachDayOfInterval, startOfYear, addDays, startOfWeek } from 'date-fns';
 
 const ContributionCalendar = () => {
   // Get starting date (1 year ago from today)
@@ -11,8 +11,11 @@ const ContributionCalendar = () => {
     const days = eachDayOfInterval({ start: startDate, end: endDate });
     const data = {};
     days.forEach(date => {
-      // Random contribution count between 0-4
-      data[format(date, 'yyyy-MM-dd')] = Math.floor(Math.random() * 5);
+      // Random contribution count between 0-4 and time watched between 30-120 minutes
+      data[format(date, 'yyyy-MM-dd')] = {
+        count: Math.floor(Math.random() * 5),
+        timeWatched: Math.floor(Math.random() * 91) + 30 // Random minutes between 30 and 120
+      };
     });
     return data;
   };
@@ -55,7 +58,8 @@ const ContributionCalendar = () => {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         week.push({
           date: dateStr,
-          count: contributions[dateStr] || 0
+          count: contributions[dateStr]?.count || 0,
+          timeWatched: contributions[dateStr]?.timeWatched || 0
         });
         currentDate = addDays(currentDate, 1);
       }
@@ -101,7 +105,7 @@ const ContributionCalendar = () => {
                     key={`${weekIndex}-${dayIndex}`}
                     className={`w-3 h-3 rounded-sm ${getContributionLevel(day.count)} 
                     transition-colors duration-200 hover:ring-1 hover:ring-gray-400 cursor-pointer`}
-                    title={`${day.count} contributions on ${day.date}`}
+                    title={`${day.count} contributions on ${day.date}. Time watched: ${day.timeWatched} mins`}
                   />
                 ))}
               </div>
