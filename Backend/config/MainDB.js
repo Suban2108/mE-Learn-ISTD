@@ -1,9 +1,7 @@
-// /config/db.js
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  try {
-    // Simplified connection without deprecated options
+  try {// Log URI for debugging
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
   } catch (err) {
